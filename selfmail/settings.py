@@ -126,7 +126,6 @@ STATICFILES_DIRS = BASE_DIR / 'static/',
 MEDIA_URL ="/media/"
 MEDIA_ROOT = BASE_DIR / 'static/media/'
 STATIC_ROOT = BASE_DIR / 'staticfiles/'
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
@@ -155,3 +154,4 @@ CLOUDINARY = {
     'api_key': config('CLOUDINARY_API_KEY'),
     'api_secret': config('CLOUDINARY_API_SECRET'),
 }
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
