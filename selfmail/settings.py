@@ -26,7 +26,7 @@ SECRET_KEY = config('DJANGO_SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['selfmail.onrender.com/']
 
 
 # Application definition
@@ -124,6 +124,7 @@ STATIC_URL = 'static/'
 STATICFILES_DIRS = BASE_DIR / 'static/',
 MEDIA_URL ="/media/"
 MEDIA_ROOT = BASE_DIR / 'static/media/'
+STATIC_ROOT = BASE_DIR / 'staticfiles/'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
