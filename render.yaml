@@ -1,0 +1,13 @@
+services:
+  - name: selfmail
+    type: web
+    env: python
+    startCommand: gunicorn selfmail.wsgi:application --bind 0.0.0.0:$PORT
+    buildCommand: python manage.py collectstatic --noinput
+    envVars:
+      DJANGO_SETTINGS_MODULE: "selfmail.settings"
+      SECRET_KEY: "django-insecure-&*5q*9nc=e0n$qeij+$mwbwlcp_@t!18%h&b9&7o(*ub=#8t!c"
+      DATABASE_URL: "your-database-url"
+    routes:
+      - path: /
+        priority: 1
