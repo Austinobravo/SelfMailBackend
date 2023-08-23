@@ -63,36 +63,37 @@ def send_email(request):
         description = request.data.get('description')
 
         try:
-            #Check for the images in the model
+            #Check for the images in the model 
             header_footer = HeaderAndFooter.objects.latest('date_created')
             if header_footer:
                 header_image = header_footer.header_image
                 footer_image = header_footer.footer_image
             #Check for the image url
             if header_image:
-                try:
-                    existing_header_image = HeaderAndFooter.objects.get(header_image=header_image)
-                    header_image_url = existing_header_image.header_image_url
-                except ObjectDoesNotExist:
+                existing_header_image = HeaderAndFooter.objects.get(header_image=header_image).header_image_url
+                if existing_header_image:
+                    header_image_url = existing_header_image
+                else :
                     cloudinary_header_image = cloudinary.uploader.upload(header_image, folder="Sme_header_photos")
                     header_image_url = cloudinary_header_image['secure_url']
                     header_footer.header_image_url =  header_image_url
                     header_footer.save()
             if footer_image:
-                try:
-                    existing_footer_image = HeaderAndFooter.objects.get(footer_image=footer_image)
-                    footer_image_url = existing_footer_image.footer_image_url
-                except ObjectDoesNotExist:
+                existing_footer_image = HeaderAndFooter.objects.get(footer_image=footer_image).footer_image_url
+                if existing_footer_image:
+                    footer_image_url = existing_footer_image
+                else:
                     cloudinary_footer_image = cloudinary.uploader.upload(footer_image, folder="Sme_footer_photos")
                     footer_image_url = cloudinary_footer_image['secure_url']
                     header_footer.footer_image_url = footer_image_url
                     header_footer.save()
+            
             #Put it into a html fie to send to a user
             email_content = f"""
                     <html>
                     <body>
                         <img src="{header_image_url}" alt="Header Image" style="width: 100%"; height:15vh" />
-                        <p>{description}</p>
+                        <pre>{description}</pre>
                         <img src="{footer_image_url}" alt="Footer Image" style="width: 100%"; height:15vh" />
                     </body>
                     </html>
