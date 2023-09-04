@@ -40,7 +40,7 @@ def openai_function(request):
             #Get OpenAi response and push to the frontend
             generated_text = response['choices'][0]['message']['content']
 
-            return Response({'message': 'Description completed','generated_text': generated_text})
+            return Response({'generated_text': generated_text})
         except ObjectDoesNotExist:
             return Response({'message': 'Description not found'})
         except socket.gaierror as dns_error:
@@ -59,7 +59,7 @@ def send_email(request):
         from_email = request.data.get('from_mail')
         to_email = request.data.get('to_mail')
         subject = request.data.get('subject')
-        files = request.FILES.get('file')
+        files = request.FILES.getlist('file')
         description = request.data.get('description')
 
         try:
