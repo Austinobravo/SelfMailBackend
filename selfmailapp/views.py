@@ -130,7 +130,7 @@ def send_email(request):
                 'subject': subject,
                 'description': description,
                 'date_created': email_record.date_created,
-                'file': str(files) if files else None
+                'file': [file.name for file in files] if files else None
 
             }
             return Response({'message': 'Email sent successfully', 'email_details': email_details}, status=status.HTTP_200_OK)

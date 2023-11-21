@@ -4,6 +4,9 @@ from django.db import models
 class FileModel(models.Model):
     file = models.FileField(blank=True, null=True, help_text="The files in the messages")
 
+    def __str__(self):
+        return str(self.file.name)
+
 #The Email Model
 class SelfMailModel(models.Model):
     from_mail = models.EmailField(help_text='The sender of the mail.')
