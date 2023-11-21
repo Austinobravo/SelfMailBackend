@@ -1,14 +1,17 @@
 from django.db import models
 
 # Create your models here.
+class FileModel(models.Model):
+    file = models.FileField(blank=True, null=True, help_text="The files in the messages")
+
 #The Email Model
 class SelfMailModel(models.Model):
     from_mail = models.EmailField(help_text='The sender of the mail.')
     to_mail = models.EmailField(help_text='The receiver of the mail')
     subject = models.CharField(max_length=500, help_text='The heading of the mail')
-    file = models.FileField(help_text='A pdf you want to send.', null=True, blank=True)
+    file = models.ManyToManyField(FileModel, help_text='A pdf you want to send.', blank=True)
     description = models.TextField(help_text='The description/mail')
-    date_created = models.DateTimeField(auto_now_add=True)
+    date_created = models.DateTimeField(auto_now_add=True) 
 
     def __str__(self):
         return f"Email to: {self.to_mail} from {self.from_mail}"

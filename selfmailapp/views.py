@@ -2,7 +2,7 @@ from django.shortcuts import render
 from rest_framework import  viewsets,status
 from rest_framework.response import  Response
 from .serializers import SelfMailSerializer
-from .models import SelfMailModel, HeaderAndFooter, Newsletter
+from .models import SelfMailModel, HeaderAndFooter, Newsletter, FileModel
 from rest_framework.decorators import api_view
 from django.core.mail import send_mail,EmailMessage, BadHeaderError
 from django.core.exceptions import ObjectDoesNotExist
@@ -38,17 +38,16 @@ def openai_function(request):
                         ]
                     )
             #Get OpenAi response and push to the frontend
-            generated_text = response['choices'][0]['message']['content']
-
-            return Response({'generated_text': generated_text})
+            generated_text = response['choices'][0]['message']['content']                                                                  
+            return Response({'generated_text': generated_text}, status=status.HTTP_200_OK)
         except ObjectDoesNotExist:
-            return Response({'message': 'Description not found'})
+            return Response({'message': 'Description not found'}, status=status.HTTP_403_FORBIDDEN)
         except socket.gaierror as dns_error:
-            return Response({'message': 'No network connection'})
+            return Response({'message': 'No network connection'},status=status.HTTP_400_BAD_REQUEST)
         except URLError as e_error:
-            return Response({'message': 'Poor or No network connection'})
+            return Response({'message': 'Poor or No network connection'},status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
-            return Response({'message': "An error occured"})
+            return Response({'message': "This AI is currently deactivated."},status=status.HTTP_400_BAD_REQUEST)
     else: 
         return Response({'message': 'No AI Completion'})
 
@@ -98,13 +97,14 @@ def send_email(request):
                     </body>
                     </html>
                 """
-            #Construct theemail and send
+            #Construct the email and send
             email = EmailMessage(subject, email_content, from_email, [to_email])
             email.content_subtype = "html"  # Set the content type to HTML
 
 
             if files:
-                email.attach(files.name, files.read(), files.content_type)
+                for file in files:
+                    email.attach(file.name, file.read(), file.content_type)
             email.send()
 
             #Save the email to your model
@@ -112,11 +112,17 @@ def send_email(request):
                 from_mail=from_email,
                 to_mail=to_email,
                 subject=subject,
-                file=files,
                 description=description,
             )
             email_record.save()
 
+            #This handles insertion of files
+            for file in files:
+                my_file = FileModel(file=file)
+                my_file.save()
+                email_record.file.add(my_file)
+
+            email_record.save()
             #Push the email details to the frontend
             email_details= {
                 'from_mail': from_email,
@@ -127,21 +133,21 @@ def send_email(request):
                 'file': str(files) if files else None
 
             }
-            return Response({'message': 'Email sent successfully', 'email_details': email_details})
+            return Response({'message': 'Email sent successfully', 'email_details': email_details}, status=status.HTTP_200_OK)
         except BadHeaderError:
-            return Response({'message': 'Invalid header found in email'})
+            return Response({'message': 'Invalid header found in email'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         except socket.gaierror as dns_error:
-            return Response({'message': 'No DNS network connection'})
+            return Response({'message': 'No DNS network connection'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         except URLError as e_error:
-            return Response({'message': 'Poor or No network connection'})
+            return Response({'message': 'Poor or No network connection'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         except ObjectDoesNotExist:
-            return Response({'message': 'Email not found'})
+            return Response({'message': 'Email not found'}, status=status.HTTP_403_FORBIDDEN)
         except SMTPConnectError as smtp_connect_error:
-            return Response({'message': 'Error connecting to the SMTP server'})
+            return Response({'message': 'Error connecting to the SMTP server'}, status=status.HTTP_401_UNAUTHORIZED)
         except SMTPSenderRefused as sender_refused_error:
-            return Response({'message': 'Sender not registered with the SMTP server'})
+            return Response({'message': 'Sender not registered with the SMTP server'}, status=status.HTTP_401_UNAUTHORIZED)
         except Exception as e:
-            return Response({'message': "An error occured"})
+            return Response({'message': "An error occured"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     else:
         return Response({'message': 'No Emails Sent yet'})
 
